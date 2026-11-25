@@ -1,0 +1,5 @@
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+0 6 * * 5 /RUTA/crontab-weekly/run-weekly-report.sh --period-type rolling_week >> /RUTA/crontab-weekly/logs/cron.out 2>&1
+59 23 L * * /RUTA/crontab-weekly/run-weekly-report.sh --period-type calendar_month >> /RUTA/crontab-weekly/logs/cron.out 2>&1
+# Alternativa si el cron no soporta L (sustituye la línea de las 23:59):
+# 0 0 1 * * /RUTA/crontab-weekly/run-weekly-report.sh --period-type previous_calendar_month >> /RUTA/crontab-weekly/logs/cron.out 2>&1

@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+logs/
+out/
+tmp/
+state/
+.run.lock/
+__pycache__/
+*.pyc
+*.csv
+*.html
+*.log
