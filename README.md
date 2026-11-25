@@ -7,6 +7,26 @@ Consulta `reservas_sala` con `psql` (sólo `SELECT`), genera HTML con Python (bi
 - `psql`, `python3` y `crontab` disponibles para el mismo usuario que ejecutará el cron.
 - Un `.env` con credenciales de producción. No se instalan dependencias del proyecto Eco.
 
+## Instalación en el servidor (de `git clone` a cron activo)
+
+Estos pasos se hacen **una sola vez** en el servidor, con el usuario que ejecutará el cron:
+
+```bash
+git clone https://github.com/bchanona/crontab-eco.git
+cd crontab-eco
+command -v python3 psql crontab
+cp .env.example .env && chmod 600 .env
+```
+
+1. Editar `.env` con los valores reales: `DATABASE_URL`, `RESEND_API_KEY`, `REPORT_FROM`, `REPORT_TO`, `REPORT_TIMEZONE`, `REPORT_PERIOD_TYPE=rolling_week` y `REPORT_DEDUPE=1`. Alternativa interactiva: `scripts/configure-env.sh`.
+2. Permisos: `chmod +x run-weekly-report.sh scripts/*.sh`.
+3. Comprobación de envío único: `./run-weekly-report.sh --period-type rolling_week` y luego `tail -n 5 logs/weekly-report.log`; debe aparecer `Resend aceptó el correo`. **Este paso no activa el cron.**
+4. Editar `scheduler/crontab.production`: sustituir `/RUTA/crontab-eco` por la ruta absoluta real (p. ej. `/home/usuario/crontab-eco`) y ajustar `PATH` si `python3`/`psql` están en otra ubicación.
+5. Instalar el cron: `(crontab -l 2>/dev/null; cat scheduler/crontab.production) | crontab -`.
+6. Verificar: `crontab -l` debe mostrar las dos líneas (viernes 06:00 y fin de mes 23:59) y el demonio `cron`/`crond` debe estar activo (`systemctl status cron` en Linux). Tras la primera ejecución programada, revisar `logs/weekly-report.log` y `logs/cron.out`.
+
+Si el cron no soporta `L`, usar la línea alternativa comentada en `scheduler/crontab.production` con `previous_calendar_month`. Para desactivar el cron: `crontab -l | grep -v 'run-weekly-report.sh' | crontab -`.
+
 ## Esquema real usado
 
 Fuente: `../eco-bot/schema.sql` y `../eco-bot/src/features/reservas/infrastructure/adapters/postgres.go`.
@@ -24,7 +44,7 @@ Estados vigentes: `approved` y `rejected`. Se incluyen todas las reservas del pe
 ## Configuración
 
 ```bash
-cd /ruta/a/crontab-weekly
+cd /ruta/a/crontab-eco
 cp .env.example .env
 chmod 600 .env
 ```
@@ -67,7 +87,7 @@ Cada comando ejecuta la SQL, genera el HTML y envía **un único** correo. **No 
 
 ## Activación del cron (queda permanente)
 
-Editar `scheduler/crontab.production`: sustituir `/RUTA/crontab-weekly` por la ruta real y ajustar `PATH` según dónde estén `psql` y `python3`. Instalar una sola vez:
+Editar `scheduler/crontab.production`: sustituir `/RUTA/crontab-eco` por la ruta real y ajustar `PATH` según dónde estén `psql` y `python3`. Instalar una sola vez:
 
 ```bash
 chmod +x run-weekly-report.sh scripts/*.sh
@@ -81,14 +101,14 @@ La ejecución manual previa es sólo comprobación; el envío automático empiez
 
 ```cron
 PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
-0 6 * * 5 /ruta/a/crontab-weekly/run-weekly-report.sh --period-type rolling_week >> /ruta/a/crontab-weekly/logs/cron.out 2>&1
-59 23 L * * /ruta/a/crontab-weekly/run-weekly-report.sh --period-type calendar_month >> /ruta/a/crontab-weekly/logs/cron.out 2>&1
+0 6 * * 5 /ruta/a/crontab-eco/run-weekly-report.sh --period-type rolling_week >> /ruta/a/crontab-eco/logs/cron.out 2>&1
+59 23 L * * /ruta/a/crontab-eco/run-weekly-report.sh --period-type calendar_month >> /ruta/a/crontab-eco/logs/cron.out 2>&1
 ```
 
 Si el cron no soporta `L`, usar la línea comentada en `scheduler/crontab.production`:
 
 ```cron
-0 0 1 * * /ruta/a/crontab-weekly/run-weekly-report.sh --period-type previous_calendar_month >> /ruta/a/crontab-weekly/logs/cron.out 2>&1
+0 0 1 * * /ruta/a/crontab-eco/run-weekly-report.sh --period-type previous_calendar_month >> /ruta/a/crontab-eco/logs/cron.out 2>&1
 ```
 
 El cron corre con el mismo usuario dueño de `.env` y requiere el demonio `cron`/`crond` activo. Para desactivarlo: `crontab -l | grep -v 'run-weekly-report.sh' | crontab -`.
