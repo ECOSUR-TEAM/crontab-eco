@@ -1,5 +1,3 @@
 PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
-0 6 * * 5 /RUTA/crontab-eco/run-weekly-report.sh --period-type rolling_week >> /RUTA/crontab-eco/logs/cron.out 2>&1
-59 23 L * * /RUTA/crontab-eco/run-weekly-report.sh --period-type calendar_month >> /RUTA/crontab-eco/logs/cron.out 2>&1
-# Alternativa si el cron no soporta L (sustituye la línea de las 23:59):
-# 0 0 1 * * /RUTA/crontab-eco/run-weekly-report.sh --period-type previous_calendar_month >> /RUTA/crontab-eco/logs/cron.out 2>&1
+0 6 * * 5 /home/ecosur/crontab-eco/run-weekly-report.sh --period-type rolling_week >> /home/ecosur/crontab-eco/logs/cron.out 2>&1
+0 0 1 * * /home/ecosur/crontab-eco/run-weekly-report.sh --period-type previous_calendar_month >> /home/ecosur/crontab-eco/logs/cron.out 2>&1

@@ -1,0 +1,26 @@
+name: Deploy to server
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Deploy latest main
+        run: |
+          set -euo pipefail
+          REPO_DIR="/home/ecosur/crontab-eco"
+          cd "$REPO_DIR"
+          git fetch origin main
+          git reset --hard origin/main
+          chmod +x run-weekly-report.sh scripts/*.sh
+          echo "Deployed $(git rev-parse --short HEAD)"
