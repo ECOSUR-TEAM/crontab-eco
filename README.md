@@ -62,7 +62,7 @@ REPORT_DEDUPE=1
 # REPORT_HOME_URL=https://www.ecosur.mx/
 ```
 
-- `REPORT_HOME_URL` es opcional y controla el enlace del logotipo y del CTA; por defecto usa `https://www.ecosur.mx/` y debe ser una URL `http`/`https`.
+- `REPORT_HOME_URL` es opcional y controla el enlace del logotipo y del pie de página; por defecto usa `https://www.ecosur.mx/` y debe ser una URL `http`/`https`.
 - El usuario de `DATABASE_URL` sólo necesita `SELECT` sobre `reservas_sala`.
 - Con `onboarding@resend.dev`, Resend sólo permite enviar al correo de la cuenta o a direcciones `delivered@resend.dev`; para otros destinatarios hay que verificar un dominio.
 - Alternativa interactiva para crear `.env`: `scripts/configure-env.sh`.
@@ -130,7 +130,7 @@ Los logs omiten API keys, contraseñas y headers `Authorization`. Con `KEEP_ARTI
 
 El HTML se genera en `python/generate_report.py` con tablas, estilos en línea, ancho máximo de 600px, media queries para móvil y modo oscuro, y la pila tipográfica `Family Sans, Segoe UI, Arial, Helvetica, sans-serif`. El logotipo se referencia como `cid:logo-ecosur` y `python/send_report.py` lo adjunta a Resend con `content_id`, para que funcione también en Gmail (los `data:` URI no son soportados ahí).
 
-El archivo optimizado es `assets/logoEcosur-email.png` (PNG transparente derivado de `assets/logoEcosur.jpeg`). Para cambiar el enlace del logo y del CTA, definir `REPORT_HOME_URL` en `.env`.
+El archivo optimizado es `assets/logoEcosur-email.png` (PNG transparente derivado de `assets/logoEcosur.jpeg`). Para cambiar el enlace del logo y del pie de página, definir `REPORT_HOME_URL` en `.env`.
 
 Checklist de QA antes de subir:
 
@@ -139,7 +139,7 @@ python3 -m unittest discover -s python -p 'test_*.py' -v
 KEEP_ARTIFACTS=1 ./run-weekly-report.sh --period-type rolling_week
 ```
 
-Revisar `out/last-report.html` en Gmail, Outlook, Apple Mail y un cliente móvil, con modo claro y oscuro: logo visible, tabla legible y CTA con enlace válido.
+Revisar `out/last-report.html` en Gmail, Outlook, Apple Mail y un cliente móvil, con modo claro y oscuro: logo visible, tabla legible y enlace del pie válido.
 
 ## Verificación del cálculo de periodos
 

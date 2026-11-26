@@ -44,8 +44,6 @@ EMAIL_CSS = """
     .eco-brand {text-align:left !important;padding-top:16px !important;}
     .eco-stack {display:block !important;width:100% !important;box-sizing:border-box !important;}
     .eco-stack + .eco-stack {padding-top:10px !important;}
-    .eco-button-cell {padding:0 !important;}
-    .eco-button {display:block !important;width:100% !important;box-sizing:border-box !important;text-align:center !important;}
     .eco-data th, .eco-data td {padding:8px 5px !important;font-size:12px !important;word-break:break-word;}
   }
   @media (prefers-color-scheme: dark) {
@@ -219,18 +217,7 @@ def render(rows: list, period_label: str, timezone_name: str, home_url: str = HO
         "</td></tr></table>"
         '<div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>'
         '{detail}'
-        '<div style="height:28px;line-height:28px;font-size:1px;">&nbsp;</div>'
-        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
-        'border="0"><tr><td align="center" class="eco-button-cell" '
-        'style="padding:0;">'
-        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" '
-        'style="margin:0 auto;">'
-        '<tr><td bgcolor="#279669" style="background-color:#279669;'
-        'border-radius:8px;">'
-        '<a class="eco-button" href="{home_url}" style="display:inline-block;'
-        'padding:12px 24px;color:#ffffff;font-size:14px;line-height:1.3;'
-        'font-weight:700;text-align:center;">Visitar ECOSUR</a>'
-        "</td></tr></table></td></tr></table>"
+        '<div style="height:8px;line-height:8px;font-size:1px;">&nbsp;</div>'
         "</td></tr>"
         '<tr><td class="eco-footer eco-pad" bgcolor="#ffffff" style="padding:20px 32px;'
         'background-color:#ffffff;border-top:1px solid #e3ebe7;">'

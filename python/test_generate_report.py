@@ -117,7 +117,8 @@ class GenerateReportTests(unittest.TestCase):
         self.assertIn("max-width:600px", output)
         self.assertIn("@media screen and (max-width:620px)", output)
         self.assertIn("@media (prefers-color-scheme: dark)", output)
-        self.assertIn("Visitar ECOSUR", output)
+        self.assertNotIn("Visitar ECOSUR", output)
+        self.assertIn("Visitar el sitio oficial", output)
         self.assertNotIn("data:image", output)
 
     def test_html_is_balanced_and_images_have_accessible_attributes(self):
