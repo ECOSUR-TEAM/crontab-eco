@@ -34,6 +34,15 @@ class PeriodTests(unittest.TestCase):
             pc.parse_period({}, ZONE, "no_existe", now=NOW)
 
 
+class HomeUrlTests(unittest.TestCase):
+    def test_valid_https_url(self):
+        pc.validate_home_url("https://www.ecosur.mx/")
+
+    def test_invalid_scheme_is_rejected(self):
+        with self.assertRaises(SystemExit):
+            pc.validate_home_url("javascript:alert(1)")
+
+
 class DatabaseUrlTests(unittest.TestCase):
     def test_production_url_is_allowed(self):
         pc.validate_database_url(

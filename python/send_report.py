@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 import json
 import os
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
+
+from email_brand import LOGO_CID, LOGO_CONTENT_TYPE, LOGO_FILENAME
 
 API_URL = "https://api.resend.com/emails"
+DEFAULT_LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / LOGO_FILENAME
 
 
 def redact(text: str, secret: str) -> str:
@@ -15,10 +20,37 @@ def redact(text: str, secret: str) -> str:
     return text
 
 
+def build_payload(
+    html_body: str,
+    subject: str,
+    report_from: str,
+    report_to: str,
+    logo_bytes: bytes,
+) -> bytes:
+    """Construye el cuerpo JSON, con el logo adjunto como imagen inline (CID)."""
+    return json.dumps(
+        {
+            "from": report_from,
+            "to": [report_to],
+            "subject": subject,
+            "html": html_body,
+            "attachments": [
+                {
+                    "filename": LOGO_FILENAME,
+                    "content_type": LOGO_CONTENT_TYPE,
+                    "content_id": LOGO_CID,
+                    "content": base64.b64encode(logo_bytes).decode("ascii"),
+                }
+            ],
+        }
+    ).encode("utf-8")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--html", required=True)
     parser.add_argument("--subject", required=True)
+    parser.add_argument("--logo", default=str(DEFAULT_LOGO_PATH))
     args = parser.parse_args()
 
     api_key = os.environ.get("RESEND_API_KEY", "")
@@ -31,18 +63,15 @@ def main() -> int:
     try:
         with open(args.html, "r", encoding="utf-8") as handle:
             html_body = handle.read()
-    except OSError:
-        print("No se pudo leer el HTML generado.", file=sys.stderr)
+        with open(args.logo, "rb") as handle:
+            logo_bytes = handle.read()
+    except OSError as exc:
+        print("No se pudo leer el HTML o el logo del correo: {}".format(exc), file=sys.stderr)
         return 1
 
-    payload = json.dumps(
-        {
-            "from": report_from,
-            "to": [report_to],
-            "subject": args.subject,
-            "html": html_body,
-        }
-    ).encode("utf-8")
+    payload = build_payload(
+        html_body, args.subject, report_from, report_to, logo_bytes
+    )
 
     request = urllib.request.Request(
         API_URL,
