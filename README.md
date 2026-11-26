@@ -12,7 +12,7 @@ Consulta `reservas_sala` con `psql` (sólo `SELECT`), genera HTML con Python (bi
 Estos pasos se hacen **una sola vez** en el servidor, con el usuario que ejecutará el cron:
 
 ```bash
-git clone https://github.com/bchanona/crontab-eco.git
+git clone https://github.com/ECOSUR-TEAM/crontab-eco.git
 cd crontab-eco
 command -v python3 psql crontab
 cp .env.example .env && chmod 600 .env
