@@ -106,7 +106,8 @@ if ! python3 "$BASE/python/generate_report.py" \
   --csv "$CSV_FILE" \
   --html "$HTML_FILE" \
   --period-label "$REPORT_PERIOD_LABEL" \
-  --timezone "$REPORT_TIMEZONE"; then
+  --timezone "$REPORT_TIMEZONE" \
+  --home-url "$REPORT_HOME_URL"; then
   fail "falló la generación del HTML"
 fi
 log INFO "HTML generado filas=$ROWS"

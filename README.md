@@ -59,8 +59,10 @@ REPORT_TO=destinatario@dominio-verificado.com
 REPORT_TIMEZONE=America/Mexico_City
 REPORT_PERIOD_TYPE=rolling_week
 REPORT_DEDUPE=1
+# REPORT_HOME_URL=https://www.ecosur.mx/
 ```
 
+- `REPORT_HOME_URL` es opcional y controla el enlace del logotipo y del pie de página; por defecto usa `https://www.ecosur.mx/` y debe ser una URL `http`/`https`.
 - El usuario de `DATABASE_URL` sólo necesita `SELECT` sobre `reservas_sala`.
 - Con `onboarding@resend.dev`, Resend sólo permite enviar al correo de la cuenta o a direcciones `delivered@resend.dev`; para otros destinatarios hay que verificar un dominio.
 - Alternativa interactiva para crear `.env`: `scripts/configure-env.sh`.
@@ -124,6 +126,21 @@ tail -n 20 logs/cron.out 2>/dev/null || true
 
 Los logs omiten API keys, contraseñas y headers `Authorization`. Con `KEEP_ARTIFACTS=1` se guardan `out/last-report.csv` y `out/last-report.html`.
 
+## Plantilla del correo
+
+El HTML se genera en `python/generate_report.py` con tablas, estilos en línea, ancho máximo de 600px, media queries para móvil y modo oscuro, y la pila tipográfica `Family Sans, Segoe UI, Arial, Helvetica, sans-serif`. El logotipo se referencia como `cid:logo-ecosur` y `python/send_report.py` lo adjunta a Resend con `content_id`, para que funcione también en Gmail (los `data:` URI no son soportados ahí).
+
+El archivo optimizado es `assets/logoEcosur-email.png` (PNG transparente derivado de `assets/logoEcosur.jpeg`). Para cambiar el enlace del logo y del pie de página, definir `REPORT_HOME_URL` en `.env`.
+
+Checklist de QA antes de subir:
+
+```bash
+python3 -m unittest discover -s python -p 'test_*.py' -v
+KEEP_ARTIFACTS=1 ./run-weekly-report.sh --period-type rolling_week
+```
+
+Revisar `out/last-report.html` en Gmail, Outlook, Apple Mail y un cliente móvil, con modo claro y oscuro: logo visible, tabla legible y enlace del pie válido.
+
 ## Verificación del cálculo de periodos
 
 ```bash
@@ -139,16 +156,18 @@ Flujo de una ejecución: cron → `run-weekly-report.sh` → `python/prepare_con
 - `.env`: configuración privada (credenciales y parámetros); ignorado por Git.
 - `.env.example`: plantilla con las variables obligatorias y opcionales.
 - `.gitignore`: excluye secretos, logs, artefactos, estado y locks.
+- `assets/`: logotipo original y versión PNG optimizada para el correo.
 - `README.md`: única documentación operativa.
 - `run-weekly-report.sh`: orquestador único; toma lock, calcula periodo, ejecuta SQL, genera HTML, envía correo y registra dedupe/resultado.
 
 ### `python/`
 
 - `prepare_config.py`: valida `.env` y `DATABASE_URL`, calcula los tres periodos en `REPORT_TIMEZONE` y exporta la configuración al orquestador.
-- `generate_report.py`: convierte el CSV de `psql` en HTML escapado, sin dependencias.
-- `send_report.py`: envía el HTML por la API de Resend y oculta la API key en errores.
+- `generate_report.py`: convierte el CSV de `psql` en HTML escapado y responsive, sin dependencias.
+- `send_report.py`: envía el HTML por la API de Resend, adjunta el logo como CID y oculta la API key en errores.
+- `email_brand.py`: constantes compartidas de CID, tipografía y URL corporativa.
 - `load_env.py`: parser de `.env` sin ejecutar shell; útil para inspeccionar variables.
-- `test_prepare_config.py` / `test_generate_report.py`: verificaciones unitarias de periodos, URL y HTML.
+- `test_prepare_config.py` / `test_generate_report.py` / `test_send_report.py`: verificaciones unitarias de periodos, URL, HTML y attachment del logo.
 
 ### `scheduler/`
 

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
+from email_brand import HOME_URL_DEFAULT
 from load_env import parse_env
 
 PERIOD_TYPES = (
@@ -25,6 +26,7 @@ EXPORT_KEYS = (
     "REPORT_PERIOD_START",
     "REPORT_PERIOD_END",
     "REPORT_PERIOD_LABEL",
+    "REPORT_HOME_URL",
 )
 
 
@@ -45,6 +47,12 @@ def validate_database_url(url: str, values: dict) -> None:
     expected_user = values.get("REPORT_DB_USER")
     if expected_user and unquote(parts.username or "") != expected_user:
         fail("DATABASE_URL no usa el usuario esperado en REPORT_DB_USER.")
+
+
+def validate_home_url(url: str) -> None:
+    parts = urlsplit(url)
+    if parts.scheme not in ("http", "https") or not parts.netloc:
+        fail("REPORT_HOME_URL debe ser una URL http o https válida.")
 
 
 def get_zone(timezone_name: str):
@@ -96,6 +104,10 @@ def main() -> int:
         fail("Faltan variables obligatorias: " + ", ".join(missing))
 
     validate_database_url(values["DATABASE_URL"], values)
+
+    home_url = values.get("REPORT_HOME_URL") or HOME_URL_DEFAULT
+    validate_home_url(home_url)
+    values["REPORT_HOME_URL"] = home_url
 
     timezone_name = values.get("REPORT_TIMEZONE") or "America/Mexico_City"
     period_type = args.period_type or values.get("REPORT_PERIOD_TYPE") or "rolling_week"
